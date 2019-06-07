@@ -1,4 +1,4 @@
-package com.thealteria.roomdemo;
+package com.thealteria.roomdemo.activities;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
@@ -12,21 +12,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-public class NewNoteActivity extends AppCompatActivity {
+import com.thealteria.roomdemo.R;
+import com.thealteria.roomdemo.model.Note;
+import com.thealteria.roomdemo.viewmodel.NotesActivityViewModel;
+
+public class NotesActivity extends AppCompatActivity {
     public static final String NOTE_ID = "note_id";
     private static final String UPDATE_NOTE = "update_note";
     private String TAG = this.getClass().getSimpleName();
     public static final String NOTE_ADDED = "new_note";
     private EditText editText;
-    private Button save;
 
-    NewNoteViewModel viewModel;
+    NotesActivityViewModel viewModel;
 
     Bundle bundle;
-    private String noteId;
-    private LiveData<Note> noteLiveData;
+    private String noteId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +35,7 @@ public class NewNoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_note);
 
         editText = findViewById(R.id.etNewNote);
-        save = findViewById(R.id.bSave);
+        Button save = findViewById(R.id.bSave);
         Button cancel = findViewById(R.id.bCancel);
 
         bundle = getIntent().getExtras();
@@ -42,32 +43,20 @@ public class NewNoteActivity extends AppCompatActivity {
             noteId = bundle.getString("note_id");
         }
 
-        viewModel = ViewModelProviders.of(this).get(NewNoteViewModel.class);
-        noteLiveData = viewModel.getNote(noteId);
+        viewModel = ViewModelProviders.of(this).get(NotesActivityViewModel.class);
+        LiveData<Note> noteLiveData = viewModel.getNote(noteId);
 
         noteLiveData.observe(this, new Observer<Note>() {
             @Override
             public void onChanged(@Nullable Note note) {
                 if (note != null) {
                     editText.setText(note.getNote());
-//                    save.setText("Update");
                 }
-//                else {
-//                    save.setText("Save");
-//                }
             }
         });
     }
 
     public void saveNote(View view) {
-//        switch (save.getText().toString()) {
-//            case "Save":
-//                addNewNote();
-//                break;
-//            case "Update":
-//
-//                break;
-//        }
         addNewNote();
         Log.i(TAG, "onClick");
     }

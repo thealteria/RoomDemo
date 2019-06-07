@@ -1,15 +1,18 @@
-package com.thealteria.roomdemo;
+package com.thealteria.roomdemo.interfaces;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import com.thealteria.roomdemo.model.Note;
+
 import java.util.List;
 
 @Dao
-interface NoteDao {
+public interface NoteDao {
 
     @Insert
     void insert(Note note);
@@ -22,4 +25,7 @@ interface NoteDao {
 
     @Update
     void update(Note note);
+
+    @Delete
+    int delete(Note note);
 }

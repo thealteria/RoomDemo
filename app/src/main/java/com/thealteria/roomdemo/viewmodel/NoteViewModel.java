@@ -1,4 +1,4 @@
-package com.thealteria.roomdemo;
+package com.thealteria.roomdemo.viewmodel;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
@@ -6,6 +6,10 @@ import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.thealteria.roomdemo.model.Note;
+import com.thealteria.roomdemo.interfaces.NoteDao;
+import com.thealteria.roomdemo.database.NoteRoomDatabase;
 
 import java.util.List;
 
@@ -25,17 +29,21 @@ public class NoteViewModel extends AndroidViewModel { //using AndroidViewModel s
     }
 
     //wrapper for insert operation
-    void insert(Note note) {
+    public void insert(Note note) {
         //we need to perform these operations in non-UI thread we use AsyncTask
         new InsertAsyncTask(noteDao).execute(note);
     }
 
-    LiveData<List<Note>> getAllNotes() {
+    public LiveData<List<Note>> getAllNotes() {
         return mAllNotes;
     }
 
-    void update(Note note){
+    public void update(Note note) {
         new UpdateAsyncTask(noteDao).execute(note);
+    }
+
+    public void delete(Note note) {
+        new DeleteAsyncTask(noteDao).execute(note);
     }
 
     @Override
@@ -44,30 +52,55 @@ public class NoteViewModel extends AndroidViewModel { //using AndroidViewModel s
         Log.i(TAG, "ViewModel destroyed");
     }
 
-    private static class InsertAsyncTask extends AsyncTask<Note, Void, Void> {
-        NoteDao noteDao;
 
-        InsertAsyncTask(NoteDao noteDao) {
-            this.noteDao = noteDao;
+    private static class OperationsAsyncTask extends AsyncTask<Note, Void, Void> {
+        NoteDao mAsyncTaskDao;
+
+        OperationsAsyncTask(NoteDao noteDao) {
+            this.mAsyncTaskDao = noteDao;
         }
 
         @Override
         protected Void doInBackground(Note... notes) {
-            noteDao.insert(notes[0]);
             return null;
         }
     }
 
-    private static class UpdateAsyncTask extends AsyncTask<Note, Void, Void> {
-        NoteDao noteDao;
+    private static class InsertAsyncTask extends OperationsAsyncTask {
 
-        UpdateAsyncTask(NoteDao noteDao) {
-            this.noteDao = noteDao;
+        InsertAsyncTask(NoteDao noteDao) {
+            super(noteDao);
         }
 
         @Override
         protected Void doInBackground(Note... notes) {
-            noteDao.update(notes[0]);
+            mAsyncTaskDao.insert(notes[0]);
+            return null;
+        }
+    }
+
+    private static class UpdateAsyncTask extends OperationsAsyncTask {
+
+        UpdateAsyncTask(NoteDao noteDao) {
+            super(noteDao);
+        }
+
+        @Override
+        protected Void doInBackground(Note... notes) {
+            mAsyncTaskDao.update(notes[0]);
+            return null;
+        }
+    }
+
+    private static class DeleteAsyncTask extends OperationsAsyncTask {
+
+        DeleteAsyncTask(NoteDao noteDao) {
+            super(noteDao);
+        }
+
+        @Override
+        protected Void doInBackground(Note... notes) {
+            mAsyncTaskDao.delete(notes[0]);
             return null;
         }
     }

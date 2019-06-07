@@ -1,4 +1,4 @@
-package com.thealteria.roomdemo;
+package com.thealteria.roomdemo.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,16 +12,28 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.thealteria.roomdemo.activities.MainActivity;
+import com.thealteria.roomdemo.model.Note;
+import com.thealteria.roomdemo.activities.NotesActivity;
+import com.thealteria.roomdemo.R;
+
 import java.util.List;
 
 public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.NotesViewHolder> {
+
+    public interface OnDeleteClickListener {
+        void onDeleteClickListener(Note note);
+    }
+
     private final LayoutInflater inflater;
     private Context mContext;
     private List<Note> mNotes;
+    private OnDeleteClickListener onDeleteClickListener;
 
-    NotesListAdapter(Context context) {
+    public NotesListAdapter(Context context, OnDeleteClickListener listener) {
         inflater = LayoutInflater.from(context);
         mContext = context;
+        this.onDeleteClickListener = listener;
     }
 
     @NonNull
@@ -52,7 +64,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         }
     }
 
-    void setNotes(List<Note> notes) {
+    public void setNotes(List<Note> notes) {
         mNotes = notes;
         notifyDataSetChanged();
     }
@@ -69,7 +81,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
 
             cardView = itemView.findViewById(R.id.cardView);
             textView = itemView.findViewById(R.id.txvNote);
-            deleteNote = itemView.findViewById(R.id.ivRowDelete);
+            deleteNote = itemView.findViewById(R.id.deleteNote);
         }
 
         void setData(String note, int position) {
@@ -81,7 +93,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, NewNoteActivity.class);
+                    Intent intent = new Intent(mContext, NotesActivity.class);
                     intent.putExtra("note_id", mNotes.get(mPosition).getId());
                     ((Activity) mContext).startActivityForResult(intent, MainActivity.UPDATE_NOTE_ACTIVITY_REQUEST_CODE);
                 }
@@ -90,7 +102,9 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
             deleteNote.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    if (onDeleteClickListener != null) {
+                        onDeleteClickListener.onDeleteClickListener(mNotes.get(mPosition));
+                    }
                 }
             });
         }
